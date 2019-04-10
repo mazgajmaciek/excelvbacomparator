@@ -1,0 +1,91 @@
+Sub LoopThroughFiles()
+    Dim StrFile As String
+    StrFile = Dir("C:\dirTest\hyperionDIR\")
+    Do While Len(StrFile) > 0
+        Debug.Print StrFile
+        StrFile = Dir
+    Loop
+End Sub
+
+Sub renameHypFiles()
+'https://stackoverflow.com/questions/49750186/vbs-rename-files-with-new-names-in-loop
+'https://excel.officetuts.net/en/vba/find-and-replace-regex
+
+    Dim fso, folder, file, folderName
+    Dim objRegEx, objMatch
+    
+    'Path
+    folderName = "C:\dirTest\hyperionDIR"
+    
+    ' Create filesystem object and the folder object
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set folder = fso.GetFolder(folderName)
+    
+    ' To Regex check if the file name begins with a number
+    Set objRegEx = CreateObject("VBScript.RegExp")
+    With objRegEx
+        .IgnoreCase = True
+        .Global = True
+        .Pattern = "^.{0,5}\_" 'if file name begins with a number
+    End With
+    
+    ' Loop over all files in the folder until the searchFileName is found
+    For Each file In folder.Files
+        'Check if file name begins with number - if yes then rename the file
+        Set objMatch = objRegEx.Execute(file.Name)
+         If objMatch.Count = 1 Then file.Name = objRegEx.Replace(file.Name, "")
+        Set objMatch = Nothing
+    Next
+End Sub
+
+'http://www.xl-central.com/list-files-fso.html
+'https://www.thespreadsheetguru.com/blog/5-ways-to-create-a-dynamic-auto-adjusting-vba-range
+
+Sub compareFilesForData()
+    Dim hyperionFilenamesCol As Collection
+    Set hyperionFilenamesCol = New Collection
+    
+    Dim cognosFilenamesCol As Collection
+    Set cognosFilenamesCol = New Collection
+
+    hyperionDir = "C:\dirTest\hyperionDIR\"
+    cognosDir = "C:\dirTest\cognosDIR\"
+    outputDir = "C:\dirTest\outputDIR\"
+    
+    'Create an instance of the FileSystemObject
+    Set objFSO = CreateObject("Scripting.FileSystemObject")
+    
+    'Get the folder
+    Set hypFolder = objFSO.GetFolder(hyperionDir)
+    Set cogFolder = objFSO.GetFolder(cognosDir)
+    
+    'Loop through each file in the folder
+    For Each objFile In hypFolder.Files
+        hyperionFilenamesCol.Add (objFile.Name)
+    Next objFile
+    
+    '2nd loop doing the same but saving filenames to a separate collection
+    For Each objFile In cogFolder.Files
+        cognosFilenamesCol.Add (objFile.Name)
+    Next objFile
+    
+    'Checks for the same filenames in two folders and compares sheets of data
+    For Each cogFile In cognosFilenamesCol
+        'Debug.Print v
+        For Each hypFile In hyperionFilenamesCol
+            If cogFile = hypFile Then
+                'MsgBox (cogFile & " filenames match!")
+                Dim cognosWb As Workbook
+                Set cognosWb = Workbooks.Open(cognosDir & cogFile)
+                Dim cognosDataRange As Range
+                Set cognosDataRange = cognosWb.Sheets(1).UsedRange
+                cognosDataRange.Select
+                
+                For Each cell In cognosDataRange
+                    cell.Value = "Dupa"
+                Next cell
+                
+            End If
+        Next hypFile
+    Next cogFile
+End Sub
