@@ -75,15 +75,27 @@ Sub compareFilesForData()
         For Each hypFile In hyperionFilenamesCol
             If cogFile = hypFile Then
                 'MsgBox (cogFile & " filenames match!")
-                Dim cognosWb As Workbook
-                Set cognosWb = Workbooks.Open(cognosDir & cogFile)
-                Dim cognosDataRange As Range
-                Set cognosDataRange = cognosWb.Sheets(1).UsedRange
-                cognosDataRange.Select
+'                Dim cognosWb As Workbook
+'                Set cognosWb = Workbooks.Open(cognosDir & cogFile)
+'                Dim cognosDataRange As Range
+'                Set cognosDataRange = cognosWb.Sheets(1).UsedRange
+'
+'                Dim hyperionWb As Workbook
+'                Set hyperionWb = Workbooks.Open(hyperionDir & cogFile)
+'                Dim hyperionDataRange As Range
+'                Set hyperionDataRange = cognosWb.Sheets(1).UsedRange
                 
-                For Each cell In cognosDataRange
-                    cell.Value = "Dupa"
-                Next cell
+                Dim Wk As Workbook
+                Set Wk = Workbooks.Add
+                Wk.Activate
+                Application.DisplayAlerts = False
+                Wk.SaveAs FileName:=outputDir & "compare - " & cogFile
+                Application.DisplayAlerts = True
+                
+                'cognosDataRange.Select
+'                For Each cell In cognosDataRange
+'                    cell.Value = "Dupa"
+'                Next cell
                 
             End If
         Next hypFile
