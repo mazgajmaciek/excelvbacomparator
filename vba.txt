@@ -76,6 +76,7 @@ Sub compareFilesForData()
             If cogFile = hypFile Then
                 'MsgBox (cogFile & " filenames match!")
                 Application.ScreenUpdating = False
+                Dim counter As Integer
                 
                 Dim cognosWb As Workbook
                 Dim cognosSheet As Worksheet
@@ -88,14 +89,11 @@ Sub compareFilesForData()
                 
                 Dim cognosDataRange As Range
                 Dim hyperionDataRange As Range
+                Dim compareDataRange As Range
 
                 Set cognosWb = Workbooks.Open(cognosDir & cogFile)
                 Set cognosSheet = cognosWb.Sheets("Sheet1")
-                
-
                 Set outputWb = Workbooks.Add
-                'Set outputCognosSheet = outputWb.Sheets("Cognos output")
-                'Set outputHyperionSheet = outputWb.Sheets("Hyperion output")
                 
                 cognosSheet.Copy After:=outputWb.Sheets(1)
                 ActiveSheet.Name = "cognos output"
@@ -113,44 +111,19 @@ Sub compareFilesForData()
                 
                 If hyperionDataRange.Address = cognosDataRange.Address Then
                     'MsgBox ("data ranges are the same")
-                    Set compareSheet = outputWb.Sheets("Sheet1")
-                    compareSheet.Activate
                     
-                    'TODO - copy range from cognos sheet and overwrite with IF formula
-                    For Each cell In cognosDataRange
-                        cell.Value = "asd"
+                    For Each cell In hyperionDataRange
+                        If Not cell.Value = ActiveWorkbook.Worksheets("cognos output").Cells(cell.Row, cell.Column).Value Then
+                            cell.Interior.Color = vbRed
+                            counter = counter + 1
+                        End If
                     Next cell
                 Else
                     MsgBox ("data ranges are different")
                 End If
-                
-                
-                
-                
-                
+
                 outputWb.SaveAs FileName:=outputDir & "compare - " & cogFile
                 outputWb.Close
-                
-                'Dim cognosDataRange As Range
-                'Set cognosDataRange = cognosWb.Sheets("Sheet1").UsedRange
-
-'                Dim hyperionWb As Workbook
-'                Set hyperionWb = Workbooks.Open(hyperionDir & hypFile, True, True)
-'                hyperionWb.Open (hyperionDir & hypFile)
-'                Dim hyperionDataRange As Range
-'                Set hyperionDataRange = hyperionWb.Sheets("Sheet1").UsedRange
-                
-'                Dim Wk As Workbook
-'                Set Wk = Workbooks.Add
-'                Wk.Activate
-'                Application.DisplayAlerts = False
-'                Wk.SaveAs FileName:=outputDir & "compare - " & cogFile
-'                Application.DisplayAlerts = True
-                
-                'cognosDataRange.Select
-'                For Each cell In cognosDataRange
-'                    cell.Value = "Dupa"
-'                Next cell
                 
             End If
         Next hypFile
